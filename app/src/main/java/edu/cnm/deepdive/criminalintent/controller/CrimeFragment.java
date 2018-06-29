@@ -3,6 +3,8 @@ package edu.cnm.deepdive.criminalintent.controller;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -15,6 +17,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import edu.cnm.deepdive.criminalintent.R;
 import edu.cnm.deepdive.criminalintent.model.Crime;
+import java.util.List;
 
 public class CrimeFragment extends Fragment {
 
@@ -22,6 +25,7 @@ public class CrimeFragment extends Fragment {
   private EditText mTitleField;
   private Button mDateButton;
   private CheckBox mSolvedCheckBox;
+  private RecyclerView mRecyclerView;
 
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -33,8 +37,10 @@ public class CrimeFragment extends Fragment {
   @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    View v = inflater.inflate(R.layout.fragment_crime, container, false);
+    View view = inflater.inflate(R.layout.fragment_crime_list, container, false);
 
+    mRecyclerView = (RecyclerView)  view.findViewById(R.id.crime_recycler_view);
+    mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     mTitleField = (EditText) v.findViewById(R.id.crime_title);
     mTitleField.addTextChangedListener(new TextWatcher() {
       @Override
@@ -56,7 +62,7 @@ public class CrimeFragment extends Fragment {
     mDateButton.setText(mCrime.getDate().toString());
     mDateButton.setEnabled(false);
 
-    mSolvedCheckBox = (CheckBox) v.findViewById(R.id.crime_solved);
+    mSolvedCheckBox = (CheckBox) view.findViewById(R.id.crime_solved);
     mSolvedCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
       @Override
       public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -64,7 +70,41 @@ public class CrimeFragment extends Fragment {
       }
     });
 
-    return v;
+    return view;
+  }
+
+  private class CrimeHolder extends RecyclerView.ViewHolder {
+
+    public CrimeHolder(LayoutInflater inflater, ViewGroup parent) {
+      super(inflater.inflate(R.layout.list_item_crime, parent, false));
+
+    }
+  }
+
+  private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder> {
+
+    private List<Crime> mCrimes;
+
+    public CrimeAdapter(List<Crime> crimes) {
+      mCrimes = crimes;
+    }
+
+    @Override
+    public CrimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+      LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
+
+      return new CrimeHolder(layoutInflater, parent);
+    }
+
+    @Override
+    public void onBindViewHolder(CrimeHolder holder, int position) {
+
+    }
+
+    @Override
+    public int getItemCount() {
+      return mCrimes.size();
+    }
   }
 
 
