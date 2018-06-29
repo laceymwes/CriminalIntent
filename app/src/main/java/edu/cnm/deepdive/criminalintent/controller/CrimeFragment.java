@@ -15,8 +15,11 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 import edu.cnm.deepdive.criminalintent.R;
 import edu.cnm.deepdive.criminalintent.model.Crime;
+import edu.cnm.deepdive.criminalintent.model.CrimeLab;
 import java.util.List;
 
 public class CrimeFragment extends Fragment {
@@ -25,7 +28,8 @@ public class CrimeFragment extends Fragment {
   private EditText mTitleField;
   private Button mDateButton;
   private CheckBox mSolvedCheckBox;
-  private RecyclerView mRecyclerView;
+  private RecyclerView mCrimeRecyclerView;
+  private CrimeAdapter mCrimeAdapter;
 
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,45 +43,45 @@ public class CrimeFragment extends Fragment {
       @Nullable Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_crime_list, container, false);
 
-    mRecyclerView = (RecyclerView)  view.findViewById(R.id.crime_recycler_view);
-    mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-    mTitleField = (EditText) v.findViewById(R.id.crime_title);
-    mTitleField.addTextChangedListener(new TextWatcher() {
-      @Override
-      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        // This space intentionally left blank
-      }
+    mCrimeRecyclerView = (RecyclerView)  view.findViewById(R.id.crime_recycler_view);
+    mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-      @Override
-      public void onTextChanged(CharSequence s, int start, int before, int count) {
-        mCrime.setTitle(s.toString());
-      }
-
-      @Override
-      public void afterTextChanged(Editable s) {
-        // This one too
-      }
-    });
-    mDateButton = (Button)v.findViewById(R.id.crime_date);
-    mDateButton.setText(mCrime.getDate().toString());
-    mDateButton.setEnabled(false);
-
-    mSolvedCheckBox = (CheckBox) view.findViewById(R.id.crime_solved);
-    mSolvedCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-      @Override
-      public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        mCrime.setSolved(isChecked);
-      }
-    });
+    updateUI();
 
     return view;
   }
 
-  private class CrimeHolder extends RecyclerView.ViewHolder {
+  private void updateUI() {
+    CrimeLab crimelab = CrimeLab.get(getActivity());
+    List<Crime> crimes = crimelab.getCrimes();
+
+    mCrimeAdapter = new CrimeAdapter(crimes);
+    mCrimeRecyclerView.setAdapter(mCrimeAdapter);
+  }
+
+  private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+    private TextView mTitleTextView;
+    private TextView mDateTextView;
+    private Crime mCrime;
+
 
     public CrimeHolder(LayoutInflater inflater, ViewGroup parent) {
       super(inflater.inflate(R.layout.list_item_crime, parent, false));
 
+        mTitleTextView = (TextView) itemView.findViewById(R.id.crime_title);
+        mTitleTextView = (TextView) itemView.findViewById(R.id.crime_date);
+    }
+
+    public void bind(Crime crime) {
+      mCrime = crime;
+      mTitleTextView.setText(crime.getTitle());
+      mDateTextView.setText(crime.getDate().toString());
+    }
+
+    @Override
+    public void onClick(View v) {
+      Toast.makeText(getActivity(), mTitleTextView.getText() + " clicked!", Toast.LENGTH_SHORT).show();
     }
   }
 
@@ -98,7 +102,8 @@ public class CrimeFragment extends Fragment {
 
     @Override
     public void onBindViewHolder(CrimeHolder holder, int position) {
-
+      Crime crime = mCrimes.get(position);
+      holder.bind(crime);
     }
 
     @Override
