@@ -22,7 +22,7 @@ import edu.cnm.deepdive.criminalintent.model.Crime;
 import edu.cnm.deepdive.criminalintent.model.CrimeLab;
 import java.util.List;
 
-public class CrimeFragment extends Fragment {
+public class CrimeListFragment extends Fragment {
 
   private Crime mCrime;
   private EditText mTitleField;
@@ -70,7 +70,7 @@ public class CrimeFragment extends Fragment {
       super(inflater.inflate(R.layout.list_item_crime, parent, false));
 
         mTitleTextView = (TextView) itemView.findViewById(R.id.crime_title);
-        mTitleTextView = (TextView) itemView.findViewById(R.id.crime_date);
+        mDateTextView = (TextView) itemView.findViewById(R.id.crime_date);
     }
 
     public void bind(Crime crime) {
