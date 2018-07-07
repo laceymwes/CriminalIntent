@@ -1,7 +1,11 @@
 package edu.cnm.deepdive.criminalintent.controller;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -11,9 +15,12 @@ import android.widget.DatePicker;
 import edu.cnm.deepdive.criminalintent.R;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class DatePickerFragment extends DialogFragment {
 
+  public static final String EXTRA_DATE =
+      "edu.cnm.deepdive.criminalintent.date";
   private static final String ARG_DATE = "date";
 
   private DatePicker mDatePicker;
@@ -47,7 +54,29 @@ public class DatePickerFragment extends DialogFragment {
     return new AlertDialog.Builder(getActivity())
         .setView(v) // setView(resourceID) added in API 21. project min SDK set to 19
         .setTitle(R.string.date_picker_title)
-        .setPositiveButton(android.R.string.ok, null)
+        .setPositiveButton(android.R.string.ok, new OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            int year = mDatePicker.getYear();
+            int month = mDatePicker.getMonth();
+            int day = mDatePicker.getDayOfMonth();
+            Date date = new GregorianCalendar(year, month, day).getTime();
+            sendResult(Activity.RESULT_OK, date);
+          }
+        })
         .create();
+  }
+
+  private void sendResult(int resultCode, Date date) {
+    if (getTargetFragment() == null) {
+      return;
+    }
+
+    Intent intent = new Intent();
+    intent.putExtra(EXTRA_DATE, date);
+
+    // call onActivityResult on CrimeActivity from which the this DialogFragment was added to the stack
+    getTargetFragment()
+        .onActivityResult(getTargetRequestCode(), resultCode, intent);
   }
 }
