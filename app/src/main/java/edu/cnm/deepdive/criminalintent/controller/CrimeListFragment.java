@@ -1,22 +1,19 @@
 package edu.cnm.deepdive.criminalintent.controller;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 import edu.cnm.deepdive.criminalintent.R;
 import edu.cnm.deepdive.criminalintent.model.Crime;
 import edu.cnm.deepdive.criminalintent.model.CrimeLab;
@@ -43,7 +40,7 @@ public class CrimeListFragment extends Fragment {
       @Nullable Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_crime_list, container, false);
 
-    mCrimeRecyclerView = (RecyclerView)  view.findViewById(R.id.crime_recycler_view);
+    mCrimeRecyclerView = view.findViewById(R.id.crime_recycler_view);
     mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
     updateUI();
@@ -55,22 +52,39 @@ public class CrimeListFragment extends Fragment {
     CrimeLab crimelab = CrimeLab.get(getActivity());
     List<Crime> crimes = crimelab.getCrimes();
 
-    mCrimeAdapter = new CrimeAdapter(crimes);
-    mCrimeRecyclerView.setAdapter(mCrimeAdapter);
+    if (mCrimeAdapter == null) {
+      mCrimeAdapter = new CrimeAdapter(crimes);
+      mCrimeRecyclerView.setAdapter(mCrimeAdapter);
+    } else {
+      mCrimeAdapter.notifyDataSetChanged();
+    }
+
   }
 
-  private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+  @Override
+  public void onResume() {
+    super.onResume();
+    updateUI();
+  }
+
+  private class CrimeHolder extends RecyclerView.ViewHolder {
 
     private TextView mTitleTextView;
     private TextView mDateTextView;
     private Crime mCrime;
 
-
     public CrimeHolder(LayoutInflater inflater, ViewGroup parent) {
       super(inflater.inflate(R.layout.list_item_crime, parent, false));
 
-        mTitleTextView = (TextView) itemView.findViewById(R.id.crime_title);
-        mDateTextView = (TextView) itemView.findViewById(R.id.crime_date);
+      mTitleTextView = itemView.findViewById(R.id.crime_title);
+      mDateTextView = itemView.findViewById(R.id.crime_date);
+      itemView.setOnClickListener(new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
+          startActivity(intent);
+        }
+      });
     }
 
     public void bind(Crime crime) {
@@ -79,10 +93,6 @@ public class CrimeListFragment extends Fragment {
       mDateTextView.setText(crime.getDate().toString());
     }
 
-    @Override
-    public void onClick(View v) {
-      Toast.makeText(getActivity(), mTitleTextView.getText() + " clicked!", Toast.LENGTH_SHORT).show();
-    }
   }
 
   private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder> {
@@ -96,7 +106,6 @@ public class CrimeListFragment extends Fragment {
     @Override
     public CrimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
       LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-
       return new CrimeHolder(layoutInflater, parent);
     }
 
@@ -111,8 +120,6 @@ public class CrimeListFragment extends Fragment {
       return mCrimes.size();
     }
   }
-
-
 
 
 }
