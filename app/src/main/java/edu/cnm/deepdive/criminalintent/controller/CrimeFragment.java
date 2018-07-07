@@ -3,6 +3,7 @@ package edu.cnm.deepdive.criminalintent.controller;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -21,6 +22,8 @@ import java.util.UUID;
 public class CrimeFragment extends Fragment {
 
   private static final String ARG_CRIME_ID = "crime_id"; // args key
+  private static final String DIALOG_DATE = "DialogDate";
+
   private Crime mCrime;
   private EditText mTitleField;
   private CheckBox mSolvedCheckBox;
@@ -49,7 +52,14 @@ public class CrimeFragment extends Fragment {
     View v = inflater.inflate(R.layout.fragment_crime, container, false);
     mDateButton = v.findViewById(R.id.crime_date);
     mDateButton.setText(mCrime.getDate().toString());
-    mDateButton.setEnabled(false);
+    mDateButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        FragmentManager manager = getFragmentManager();
+        DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
+        dialog.show(manager, DIALOG_DATE); // DIALOG_DATE = fragment TAG
+      }
+    });
     mTitleField = v.findViewById(R.id.crime_title);
     mTitleField.setText(mCrime.getTitle());
     mTitleField.addTextChangedListener(new TextWatcher() {
